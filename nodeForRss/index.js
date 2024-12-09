@@ -15,7 +15,7 @@ if (!isProd) {
 const app = new Koa()
 const router = new Router()
 
-app.use(serve(process.env.PWD || '.'))
+app.use(serve('.'))
 
 // 定义一个简单的中间件，记录请求的日志
 app.use(async (ctx, next) => {
