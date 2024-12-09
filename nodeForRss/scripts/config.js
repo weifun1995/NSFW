@@ -10,7 +10,7 @@ const appConfig = {
         { 'text': '10mu 秘蔵', value: 'jav-10mu', 'loading': false, 'success': false },
         { 'text': '人妻マンコ図鑑', value: 'jav-paco', 'loading': false, 'success': false },
         { 'text': 'hucows', value: 'bdsm_hucows', 'loading': false, 'success': false },
-        { 'text': '妇科检查 - gynoexclusive(4K)', value: 'gyno-maturegynoexam', 'loading': false, 'success': false },
+        { 'text': '妇科检查 - gynoexclusive(4K)', value: 'gyno-gynoexclusive', 'loading': false, 'success': false },
         { 'text': '妇科检查 - maturegynoexam', value: 'gyno-maturegynoexam', 'loading': false, 'success': false },
     ]
 }
