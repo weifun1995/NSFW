@@ -151,7 +151,7 @@ class AdultHub {
             // 去掉多余空格
             Release = Release.split(' ').filter(Boolean).join(' ')
             // 转为一般时间格式
-            Release = dayjs(trimmedStr, 'D MMM YYYY').format('YYYY-MM-DD')
+            Release = dayjs(Release, 'D MMM YYYY').format('YYYY-MM-DD')
             let ThumbHigh = element.querySelector('img').src
 
             obj.id = link.href
