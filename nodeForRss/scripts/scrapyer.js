@@ -39,8 +39,6 @@ class AdultHub {
         }
         let data = res.data
 
-     
-
         let child = []
         for (let item of data.Rows) {
             let obj = {}
@@ -128,14 +126,13 @@ class AdultHub {
     }
 
     bdsm_hucows = async (series) => {
-        console.log('执行')
         let url = 'https://www.hucows.com/updatespage/'
         let result = {
             "title": "BDSM - hucows(吸奶器)",
             "home_page_url": url,
         }
         let res = await retryAxiosRequestGet(url)
-        if (!res.data) {
+        if (!res) {
             return null
         }
         const dom = new JSDOM(res.data)
@@ -144,6 +141,7 @@ class AdultHub {
         let child = []
         
         document.querySelectorAll('.row article').forEach((element, index)=> {
+            let obj = {}
             let link = element.querySelector('a')
             let title = element.querySelector('h1').textContent.trim()
             let desc = element.querySelector('.entry-content p').textContent.trim()
@@ -151,19 +149,18 @@ class AdultHub {
             // 去掉多余空格
             Release = Release.split(' ').filter(Boolean).join(' ')
             // 转为一般时间格式
-            Release = dayjs(trimmedStr, 'D MMM YYYY').format('YYYY-MM-DD')
+            Release = dayjs(Release, 'D MMM YYYY').format('YYYY-MM-DD')
             let ThumbHigh = element.querySelector('img').src
 
             obj.id = link.href
             obj.title = title
-            obj.content_text = `时间：${Release} \n 番号：${MovieID}  \n 描述：${title}`
+            obj.content_text = `时间：${Release}  \n 描述：${title}`
             obj.url = this.rarbg.replace('xxxadult', 'hucows')
             let date = dayjs(Release)
             obj.date_published = date.toISOString()
             obj.external_url = link.href
-            obj.summary = `时间：${Release} 番号：${MovieID} `
+            obj.summary = `时间：${Release} 描述：${title} `
             obj.image = ThumbHigh
-            obj.tags = [Release, MovieID]
             child.push(obj)
         })
         result.items = child

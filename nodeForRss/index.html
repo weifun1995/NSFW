@@ -47,7 +47,8 @@
                     :loading="item.loading" @click="doQuery(item)">
                     {{item.text}}
                 </van-button>
-                <van-button plain icon="/images/copy.png" type="primary" @click="doCopy(item)"></van-button>
+                <van-button plain icon="/images/copy.png" type="primary"
+                    @click="doCopy(item)"></van-button>
                 <van-icon v-show="item.success" color="green" size="36"
                     name="certificate" />
             </div>
@@ -78,23 +79,25 @@
                         console.error('Error fetching data:', error);
                     })
             },
-            doQuery(item) {
+            async doQuery(item) {
                 item.loading = true
-                axios.get(`/scrapyer?series=${item.value}`)
-                    .then((response) => {
-                        item.success = true
-                        item.loading = false
-                        vant.showToast({
-                            message: '请求成功',
-                            duration: 3000,
-                            forbidClick: true
-                        })
+                let result = await axios.get(`/scrapyer?series=${item.value}`)
+                console.log('结果', result)
+                if (result && result?.data?.success) {
+                    item.success = true
+                    vant.showToast({
+                        message: '请求成功',
+                        duration: 2000,
+                        forbidClick: true
                     })
-                    .catch((error) => {
-                        // 如果请求出现错误，打印错误信息（可完善错误处理逻辑，比如展示友好的错误提示给用户）
-                        console.error('Error fetching data:', error);
-                        item.loading = false
+                } else {
+                    vant.showToast({
+                        message: result?.data?.data || '请求失败',
+                        duration: 3000,
+                        forbidClick: true
                     })
+                }
+                item.loading = false
             },
             doCopy(item) {
                 console.log(item)

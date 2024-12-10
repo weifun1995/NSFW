@@ -2,7 +2,7 @@ import Koa from 'koa'
 import serve from 'koa-static'
 import Router from 'koa-router'
 import json from 'koa-json'
-import { uploadFileToGitHub } from './utils/github.js'
+import { myUploadFileToGitHub } from './utils/github.js'
 import { appConfig } from './scripts/config.js'
 global.appConfig = appConfig
 import { javHub } from './scripts/scrapyer.js'
@@ -42,22 +42,20 @@ app.use(async (ctx, next) => {
 router.get('/scrapyer', async (ctx) => {
     const series = ctx.query.series
     if (series) {
-        // 调用内部方法获取返回值
-        const result = await javHub(series)
-        if (result.success) {       
-            result.version = "https://jsonfeed.org/version/1.1"
-            result.feed_url = `${appConfig.storeRaw}/${series}.json`
-
-            console.log(result)
-
-            let github = await uploadFileToGitHub(`${series}.json`, JSON.stringify(result))
-            ctx.body = github
-        } else {
+        const scrapyerRes = await javHub(series)
+        console.log('爬取结果', scrapyerRes)
+        if (!scrapyerRes) {
             ctx.body = {
                 'success': false,
-                'data': result.message
+                'data': `爬取网站：${series} 失败 , ${scrapyerRes?.message}`
             }
+            return
         }
+        scrapyerRes.version = "https://jsonfeed.org/version/1.1"
+        scrapyerRes.feed_url = `${appConfig.storeRaw}/${series}.json`
+
+        let githubRes = await myUploadFileToGitHub(`${series}.json`, JSON.stringify(scrapyerRes))
+        ctx.body = githubRes
     } else {
         ctx.body = {
             'success': false,
@@ -71,14 +69,14 @@ router.get('/link', async (ctx) => {
     list.map((item)=> {
         item.link = `${global.appConfig.storeRaw}/${item.value}.json`
     })
-    console.log(list)
+    // console.log(list)
     ctx.body = list
 })
 
 
 router.get('/github', async (ctx) => {
     const series = ctx.query.series
-    return await uploadFileToGitHub('a.txt', '这是测试文本')
+    return await myUploadFileToGitHub('a.txt', '这是测试文本')
 })
 
 app.use(json())
