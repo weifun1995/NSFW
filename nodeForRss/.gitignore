@@ -1,10 +1,5 @@
-# 忽略环境变量文件
-.env
-# 忽略依赖包文件夹
 node_modules/
-
-# 忽略 pnpm 锁定文件
-pnpm-lock.yaml
-
-.idea/
 .vercel
+.idea
+.env
+pnpm-lock.yaml

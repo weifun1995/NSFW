@@ -1,7 +1,6 @@
-import Koa from 'koa'
-import serve from 'koa-static'
-import Router from 'koa-router'
-import json from 'koa-json'
+// 引入Express模块
+import express from 'express'
+import cors from 'cors'
 import { myUploadFileToGitHub } from './utils/github.js'
 import { appConfig } from './scripts/config.js'
 global.appConfig = appConfig
@@ -12,35 +11,22 @@ if (!isProd) {
     import('dotenv').then(({ config }) => config()) // 加载 .env 文件中的变量
 }
 
-const app = new Koa()
-const router = new Router()
+// 创建Express应用实例
+const app = express()
 
-app.use(serve('.'))
+// 配置静态文件服务（用于提供index.html等静态文件访问）
+app.use(express.static('.'))
 
-// 定义一个简单的中间件，记录请求的日志
-app.use(async (ctx, next) => {
-    console.log(`当前请求路径： ${ctx.url}`)
-    if (ctx.path === '/') {
-        ctx.type = 'html'
-        ctx.body = await new Promise((resolve, reject) => {
-            // 使用fs模块读取index.html文件内容（此处需导入fs模块）
-            import('fs').then(({ default: fs }) => {
-                fs.readFile('index.html', 'utf8', (err, data) => {
-                    if (err) {
-                        reject(err)
-                    } else {
-                        resolve(data)
-                    }
-                })
-            })
-        })
-    }
-    await next()
-})
+// 使用 CORS 中间件
+app.use(cors())
 
+// 创建 /hello 的GET接口，接受name参数
+// app.get('/', (req, res) => {
+//     res.sendFile('index.html')
+//   })
 
-router.get('/scrapyer', async (ctx) => {
-    const series = ctx.query.series
+app.get('/scrapyer', async (req, res) => {
+    const { series } = req.query
     if (series) {
         const scrapyerRes = await javHub(series)
         console.log('爬取结果', scrapyerRes)
@@ -55,43 +41,34 @@ router.get('/scrapyer', async (ctx) => {
         scrapyerRes.feed_url = `${appConfig.storeRaw}/${series}.json`
 
         let githubRes = await myUploadFileToGitHub(`${series}.json`, JSON.stringify(scrapyerRes))
-        ctx.body = githubRes
+        res.json(githubRes)
     } else {
-        ctx.body = {
+        res.json = {
             'success': false,
             'data': '请传入series参数'
         }
     }
 })
 
-router.get('/link', async (ctx) => {
+app.get('/link', (req, res) => {
     let list = appConfig.list
     list.map((item)=> {
         item.link = `${global.appConfig.storeRaw}/${item.value}.json`
     })
-    // console.log(list)
-    ctx.body = list
+    res.json(list)
 })
 
 
-router.get('/github', async (ctx) => {
-    const series = ctx.query.series
-    return await myUploadFileToGitHub('a.txt', '这是测试文本')
+// 启动服务器，监听端口3100
+let port = 3000
+const server = app.listen(port, () => {
+    console.log(`Server is running on port ${port}`)
 })
 
-app.use(json())
-app.use(router.routes()).use(router.allowedMethods())
-
-// 创建一个处理函数
-const handler = app.callback()
-
-// 修改服务器启动逻辑
-if (!isProd) {
-    const port = process.env.PORT || 4090
-    app.listen(port, () => {
-        console.log(`Server running on http://localhost:${port}`)
-    })
-}
-
-// 导出处理函数
-export default handler
+// 检查端口是否被占用，如果被占用则端口自动+1
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        port++
+        server.listen(port)
+    }
+})

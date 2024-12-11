@@ -80,21 +80,21 @@ class GitHub {
             console.log('测试 GitHub 令牌权限...')
 
             // 测试令牌基本信息
-            const { data: rateLimit } = await this.octokit.rest.rateLimit.get();
+            const { data: rateLimit } = await this.octokit.rest.rateLimit.get()
             console.log('令牌信息：', {
                 limit: rateLimit.limit,
                 remaining: rateLimit.remaining,
                 reset: new Date(rateLimit.reset * 1000).toLocaleString()
-            });
+            })
 
             // 测试仓库权限
             const { data: repo } = await this.octokit.rest.repos.get({
                 owner: global.appConfig.owner,
                 repo: global.appConfig.repo
-            });
+            })
 
             // 测试写入权限
-            const testContent = 'test content';
+            const testContent = 'test content'
             try {
                 await this.octokit.rest.repos.createOrUpdateFileContents({
                     owner: global.appConfig.owner,
@@ -102,14 +102,14 @@ class GitHub {
                     path: 'test.txt',
                     message: 'test commit',
                     content: Buffer.from(testContent).toString('base64')
-                });
-                console.log('写入权限测试成功');
+                })
+                console.log('写入权限测试成功')
             } catch (error) {
-                console.log('写入权限测试失败：', error.message);
+                console.log('写入权限测试失败：', error.message)
             }
 
         } catch (error) {
-            console.log('权限测试失败：', error.message);
+            console.log('权限测试失败：', error.message)
         }
     }
 
@@ -170,7 +170,7 @@ class GitHub {
 
             console.log('准备更新/创建文件...')
             // 使用 this.octokit.rest.repos.createOrUpdateFileContents 替代 request
-            const currentTime = dayjs();
+            const currentTime = dayjs()
             const formattedTime = currentTime.format('YYYY-MM-DD (HH:mm)')
             const response = await this.octokit.rest.repos.createOrUpdateFileContents({
                 owner,
