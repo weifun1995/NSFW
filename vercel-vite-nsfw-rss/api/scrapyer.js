@@ -49,6 +49,7 @@ function retryAxiosRequestGetPrimise(url) {
                     retryCount++
                     doRequest()
                 } else {
+                    console.error(`请求10次仍然失败，放弃重试。`)
                     reject(error)
                 }
             }
@@ -230,12 +231,23 @@ const gyno_dollshub = async (series) => {
     } catch (error) {
         console.error('有接口请求失败：', error)
     }
-    result.items = child
+    // maturegynoexam 分页数据存在重复的
+    let ids = []
+    let temp = []
+    child.forEach(item => {
+        if (ids.includes(item.id)) {
+            return
+        }
+        ids.push(item.id)
+        temp.push(item)
+    })
+    result.items = temp
     return result
 
 }
 
 const bdsm_hucows = async (series) => {
+    console.log('进入', bdsm_hucows)
     let url = 'https://www.hucows.com/updatespage/'
 
     const url1 = url
@@ -262,7 +274,7 @@ const bdsm_hucows = async (series) => {
             // 转为一般时间格式
             Release = dayjs(Release, 'D MMM YYYY').format('YYYY-MM-DD')
             let ThumbHigh = element.querySelector('img').src
-    
+
             obj.id = 'hucows_' + Release.replaceAll('-', '')
             obj.title = title
             obj.content_text = `时间：${Release}  \n 描述：${title}`
@@ -294,28 +306,38 @@ const bdsm_hucows = async (series) => {
     }
 
     result.items = child
-    return result
+    console.log(series, '请求的数据', child.length, child)
+    return child.length > 0 ? result : null
 }
 
 export default async (request, response) => {
     let { series } = request.query
     let result = null
-
+    let existsFlag = false
     try {
         if (['jav-10mu', 'jav-paco'].includes(series)) {
+            existsFlag = true
             result = await jav_10mu_paco(series)
         }
 
         if (['jav-carib-pussy', 'jav-carib-anal', 'jav-carib-bodyCheck'].includes(series)) {
+            existsFlag = true
             result = await jav_carib(series)
         }
 
         if (['gyno-gynoexclusive', 'gyno-maturegynoexam'].includes(series)) {
+            existsFlag = true
             result = await gyno_dollshub(series)
         }
 
         if (['bdsm-hucows'].includes(series)) {
+            existsFlag = true
             result = await bdsm_hucows(series)
+        }
+
+        if (!existsFlag) {
+            response.status(200).json({ 'success': false, 'message': '没有该系列' })
+            return
         }
 
         console.log('result', result)
@@ -326,7 +348,8 @@ export default async (request, response) => {
                 item.series = series
             })
 
-            console.log('rows', rows.length)
+
+            console.log('rows', rows.length, rows)
 
             // 进行数据保存
             if (rows.length > 0) {
