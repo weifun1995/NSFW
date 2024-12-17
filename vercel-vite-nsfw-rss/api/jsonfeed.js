@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import {appConfig} from '../public/js/config.js'
+import { appConfig } from '../public/js/config.js'
 
 // 使用环境变量来存储Supabase的配置信息更为安全，这里假设你已经在Vercel项目设置中配置好了对应的环境变量
 const supabaseUrl = process.env.SUPABASE_URL
@@ -10,6 +10,12 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default async (req, res) => {
     const { series } = req.query
+    
+     // 设置CORS头部，允许跨域请求
+     res.setHeader('Access-Control-Allow-Origin', '*') // 允许所有域名访问，可以根据需要修改
+     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS') // 允许的请求方法
+     res.setHeader('Access-Control-Allow-Headers', 'Content-Type') // 允许的请求头
+
     const { data, error } = await supabase
         .from('rss')
         .select('*')
@@ -23,16 +29,17 @@ export default async (req, res) => {
         let obj = {
             version: 'https://jsonfeed.org/version/1.1',
             title: '',
-            home_page_url: '',  
+            home_page_url: '',
             feed_url: `vercel-vite-nsfw-rss.vercel.app/api/jsonfeed?series=${series}`,
             items: data
         }
         console.log(appConfig)
         let row = appConfig.homelist.filter(item => item.value == series)
-        if(row.length > 0){
+        if (row.length > 0) {
             obj.title = row[0].title
             obj.home_page_url = row[0].home_page_url
         }
+
        
         res.setHeader('Content-Type', 'application/json')
         res.status(200).json(obj)

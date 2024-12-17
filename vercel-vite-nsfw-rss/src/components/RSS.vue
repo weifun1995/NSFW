@@ -46,8 +46,9 @@ export default defineComponent({
     },
     doCopy(item) {
       // 创建一个临时的输入元素
+      let host = window.location.host
       const input = document.createElement('input');
-      input.value = item.home_page_url; // 将 item.link 赋值给输入元素
+      input.value = host + '/api/jsonfeed?series=' + item.id; // 将 item.link 赋值给输入元素
       document.body.appendChild(input); // 将输入元素添加到文档中
       input.select(); // 选中输入元素的内容
       document.execCommand('copy'); // 执行复制命令

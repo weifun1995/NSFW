@@ -97,7 +97,6 @@ const jav_10mu_paco = async (series) => {
         obj.external_url = `https://www.10musume.com/movies/${item.MovieID}/`
         obj.summary = `时间：${item.Release} 番号：${item.MovieID} `
         obj.image = item.ThumbHigh
-        obj.tags = [item.Release, item.MovieID]
         child.push(obj)
     }
     result.items = child
@@ -165,7 +164,6 @@ const jav_carib = async (series) => {
         obj.external_url = `https://www.caribbeancom.com/moviepages/${link}/`
         obj.summary = `时间：${Release} 番号：${MovieID} `
         obj.image = ThumbHigh
-        obj.tags = [Release, MovieID]
         child.push(obj)
     })
     result.items = child
